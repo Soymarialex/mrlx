@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>prática personalizada</title>
+  <!-- Tailwind CSS para el diseño base -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    @font-face {
+      font-family: 'Platform Medium';
+      src: local('Platform Medium'), local('Segoe UI'), local('Roboto'), sans-serif;
+    }
+
+    body {
+      font-family: 'Platform Medium', 'Segoe UI', Roboto, sans-serif;
+      color: #121118;
+      background-color: #FFFFFF;
+      line-height: 1.6;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #FF79AC;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      border-bottom: 2px solid #FF79AC;
+      padding-bottom: 0.5rem;
+      color: #121118;
+    }
+
+    p, .justified-text {
+      text-align: justify;
+      font-size: 1.05rem;
+    }
+
+    /* Identidad cromática de botones y bordes */
+    .btn-primary {
+      background-color: #FF79AC;
+      color: #FFFFFF;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .btn-primary:hover {
+      background-color: #e05e91;
+    }
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background-color: #FFB3D1;
+      color: #121118;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+    .btn-secondary:hover {
+      background-color: #ff99c2;
+    }
+    .btn-secondary:active {
+      transform: scale(0.98);
+    }
+
+    .border-divider {
+      border-color: #E0E0E0;
+    }
+
+    /* Efecto Flip interactivo de las tarjetas de aprendizaje */
+    .card-container {
+      perspective: 1000px;
+    }
+    .card-inner {
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+    .card-inner.flipped {
+      transform: rotateY(180deg);
+    }
+    .card-front, .card-back {
+      backface-visibility: hidden;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .card-back {
+      transform: rotateY(180deg);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 md:p-8">
+
+  <main class="w-full max-w-4xl bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-divider">
+    
+    <!-- Título Principal de la Página -->
+    <header class="text-center mb-8">
+      <h1>práctica personalizada</h1>
+    </header>
+
+    <!-- Navegación por pestañas -->
+    <nav class="flex justify-center gap-4 mb-8 border-b border-divider pb-4">
+      <button onclick="switchTab('flashcards')" id="tab-flashcards" class="px-5 py-2.5 rounded-lg font-bold btn-primary">
+        <strong>Tarjetas de Estudio</strong>
+      </button>
+      <button onclick="switchTab('quiz')" id="tab-quiz" class="px-5 py-2.5 rounded-lg font-bold btn-secondary">
+        <strong>Práctica de Selección</strong>
+      </button>
+    </nav>
+
+    <!-- SECCIÓN 1: TARJETAS DE ESTUDIO -->
+    <section id="sec-flashcards" class="tab-content block">
+      <h2 class="mb-4"><strong>Estudio con Tarjetas</strong></h2>
+      <p class="mb-6">Click the card to flip it and reveal its meaning. Use the bottom buttons to navigate the entire vocabulary list..</p>
+      
+      <div class="flex flex-col items-center justify-center">
+        <!-- Tarjeta Interactiva -->
+        <div class="card-container w-full max-w-lg h-96 mb-6" onclick="toggleCard()">
+          <div id="flashcard-inner" class="card-inner w-full h-full relative rounded-xl shadow-md border border-divider">
+            
+            <!-- Cara Delantera (Inglés) -->
+            <div class="card-front bg-white rounded-xl flex flex-col justify-between p-6 md:p-8 text-center">
+              <span class="text-xs text-gray-400 uppercase tracking-wider font-bold">In English</span>
+              <div class="my-auto">
+                <p id="card-front-text" class="text-2xl md:text-3xl font-bold text-[#FF79AC] mb-4"></p>
+                <div class="border-t border-divider w-24 mx-auto my-3"></div>
+                <p id="card-front-example" class="text-sm md:text-base italic text-gray-600 px-4"></p>
+              </div>
+              <span class="text-xs text-[#FF79AC] mt-4 font-bold">(Haz clic para ver traducción)</span>
+            </div>
+            
+            <!-- Cara Trasera (Español) -->
+            <div class="card-back bg-[#FFB3D1] text-[#121118] rounded-xl flex flex-col justify-between p-6 md:p-8 text-center">
+              <span class="text-xs text-gray-700 uppercase tracking-wider font-bold">En Español</span>
+              <div class="my-auto">
+                <p id="card-back-text" class="text-2xl md:text-3xl font-bold mb-4"></p>
+                <div class="border-t border-[#FF79AC] w-24 mx-auto my-3"></div>
+                <p id="card-back-example" class="text-sm md:text-base italic text-gray-800 px-4"></p>
+              </div>
+              <span class="text-xs text-gray-700 mt-4 font-bold">(Haz clic para volver al inglés)</span>
+            </div>
+            
+          </div>
+        </div>
+
+        <!-- Controles de Navegación -->
+        <div class="flex items-center justify-between w-full max-w-lg gap-4">
+          <button onclick="prevCard()" class="btn-secondary px-6 py-2.5 rounded-lg font-bold flex-1">
+            <strong>Anterior</strong>
+          </button>
+          <span id="card-counter" class="font-bold text-sm bg-gray-50 px-4 py-2 rounded-lg border border-divider">1 / 47</span>
+          <button onclick="nextCard()" class="btn-primary px-6 py-2.5 rounded-lg font-bold flex-1">
+            <strong>Siguiente</strong>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: PRÁCTICA DE SELECCIÓN MÚLTIPLE (POR NIVELES) -->
+    <section id="sec-quiz" class="tab-content hidden">
+      <h2 class="mb-4"><strong>Práctica de Selección</strong></h2>
+      <p class="mb-6">Elige el nivel que deseas practicar. Cada nivel evalúa un grupo exclusivo de vocabulario del temario completo de 47 palabras, sin pistas de respuestas en la pregunta.</p>
+      
+      <!-- Selector de Niveles Visual -->
+      <div class="flex flex-wrap justify-center gap-2 mb-6">
+        <button onclick="selectLevel(1)" id="btn-lvl-1" class="px-4 py-2 rounded-lg font-bold text-sm btn-primary">
+          <strong>Nivel 1</strong>
+        </button>
+        <button onclick="selectLevel(2)" id="btn-lvl-2" class="px-4 py-2 rounded-lg font-bold text-sm btn-secondary">
+          <strong>Nivel 2</strong>
+        </button>
+        <button onclick="selectLevel(3)" id="btn-lvl-3" class="px-4 py-2 rounded-lg font-bold text-sm btn-secondary">
+          <strong>Nivel 3</strong>
+        </button>
+        <button onclick="selectLevel(4)" id="btn-lvl-4" class="px-4 py-2 rounded-lg font-bold text-sm btn-secondary">
+          <strong>Nivel 4</strong>
+        </button>
+        <button onclick="selectLevel(5)" id="btn-lvl-5" class="px-4 py-2 rounded-lg font-bold text-sm btn-secondary">
+          <strong>Nivel 5</strong>
+        </button>
+      </div>
+
+      <div id="quiz-container" class="space-y-6">
+        <!-- Pregunta Generada de forma Dinámica -->
+        <div class="bg-white p-6 rounded-xl border border-divider">
+          <div class="flex justify-between items-center mb-2">
+            <span id="quiz-level-indicator" class="text-xs font-bold uppercase tracking-wider text-gray-500">NIVEL 1</span>
+            <span id="quiz-question-num" class="text-sm text-[#FF79AC] font-bold">Pregunta 1 de 10</span>
+          </div>
+          <p id="quiz-question-text" class="text-lg font-bold mb-4"></p>
+          
+          <div id="quiz-options" class="grid grid-cols-1 gap-3">
+            <!-- Botones de opciones -->
+          </div>
+        </div>
+
+        <!-- Controles e Información del Quiz -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div id="quiz-feedback" class="font-bold text-lg text-center sm:text-left min-h-[1.5rem]"></div>
+          <div class="flex gap-3">
+            <button onclick="nextQuizQuestion()" id="btn-quiz-next" class="btn-primary px-6 py-2.5 rounded-lg font-bold hidden">
+              <strong>Siguiente Pregunta</strong>
+            </button>
+            <button onclick="goToNextLevel()" id="btn-quiz-next-lvl" class="btn-primary px-6 py-2.5 rounded-lg font-bold hidden">
+              <strong>Siguiente Nivel</strong>
+            </button>
+            <button onclick="restartQuiz()" id="btn-quiz-restart" class="btn-secondary px-6 py-2.5 rounded-lg font-bold hidden">
+              <strong>Reiniciar Nivel</strong>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const vocabulary = [
+      { 
+        es: "hacer una reverencia", 
+        quizEs: "hacer una reverencia",
+        en: "to bow",
+        enEx: "You should bow when meeting the emperor.",
+        esEx: "Debes hacer una reverencia al conocer al emperador."
+      },
+      { 
+        es: "lo que menos me preocupaba", 
+        quizEs: "lo que menos me preocupaba",
+        en: "the least of my worries",
+        enEx: "Passing the test was the least of my worries.",
+        esEx: "Aprobar la prueba era lo que menos me preocupaba."
+      },
+      { 
+        es: "después de usarlo (after being + participio)", 
+        quizEs: "después de usarlo",
+        en: "after being used",
+        enEx: "Put the tool away after being used.",
+        esEx: "Guarda la herramienta después de usarla."
+      },
+      { 
+        es: "a excepción de eso", 
+        quizEs: "a excepción de eso",
+        en: "aside from that",
+        enEx: "Aside from that, it was a wonderful day.",
+        esEx: "A excepción de eso, fue un día maravilloso."
+      },
+      { 
+        es: "siempre que", 
+        quizEs: "siempre que",
+        en: "whenever",
+        enEx: "You can call me whenever you want.",
+        esEx: "Puedes llamarme siempre que quieras."
+      },
+      { 
+        es: "llevarse bien", 
+        quizEs: "llevarse bien",
+        en: "hit it off",
+        enEx: "They met yesterday and they immediately hit it off.",
+        esEx: "Se conocieron ayer y de inmediato se llevaron bien."
+      },
+      { 
+        es: "encajar con", 
+        quizEs: "encajar con",
+        en: "fit it with",
+        enEx: "He tried hard to fit it with his new colleagues.",
+        esEx: "Él se esforzó mucho por encajar con sus nuevos compañeros."
+      },
+      { 
+        es: "por raro que parezca", 
+        quizEs: "por raro que parezca",
+        en: "strangely enough",
+        enEx: "Strangely enough, the front door was open.",
+        esEx: "Por raro que parezca, la puerta principal estaba abierta."
+      },
+      { 
+        es: "caerse a pedazos", 
+        quizEs: "caerse a pedazos",
+        en: "falling apart",
+        enEx: "This old building is completely falling apart.",
+        esEx: "Este viejo edificio se está cayendo completamente a pedazos."
+      },
+      { 
+        es: "alumbrar", 
+        quizEs: "alumbrar",
+        en: "shines",
+        enEx: "She shines the flashlight on a puddle of water.",
+        esEx: "Ella alumbró con la linterna un charco de agua."
+      },
+      { 
+        es: "impecable", 
+        quizEs: "impecable",
+        en: "pristine",
+        enEx: "The car was restored to pristine condition.",
+        esEx: "El auto fue restaurado a una condición impecable."
+      },
+      { 
+        es: "es inútil / no sirve de nada", 
+        quizEs: "es inútil / no sirve de nada",
+        en: "it is no use",
+        enEx: "He tried to convince me, but it was no use.",
+        esEx: "Trató de convencerme, pero fue inútil."
+      },
+      { 
+        es: "tapado", 
+        quizEs: "tapado",
+        en: "clogged",
+        enEx: "The kitchen drain is completely clogged.",
+        esEx: "El desagüe de la cocina está completamente tapado."
+      },
+      { 
+        es: "está dando frutos", 
+        quizEs: "está dando frutos",
+        en: "is paying off",
+        enEx: "All your hard study is paying off.",
+        esEx: "Todo tu esfuerzo en el estudio está dando frutos."
+      },
+      { 
+        es: "dirigirse a", 
+        quizEs: "dirigirse a",
+        en: "to make for",
+        enEx: "Let's make for the exit before it starts to rain.",
+        esEx: "Dirijámonos a la salida antes de que empiece a llover."
+      },
+      { 
+        es: "tan (algo) como", 
+        quizEs: "tan (algo) como",
+        en: "as sth as",
+        enEx: "He is as strong as his older brother.",
+        esEx: "Él es tan fuerte como su hermano mayor."
+      },
+      { 
+        es: "embrujado", 
+        quizEs: "embrujado",
+        en: "haunted",
+        enEx: "They say that old house on the corner is haunted.",
+        esEx: "Dicen que esa casa vieja en la esquina está embrujada."
+      },
+      { 
+        es: "no lo soporto", 
+        quizEs: "no lo soporto",
+        en: "i can´t take it",
+        enEx: "This loud music is driving me crazy, I can´t take it!",
+        esEx: "Esta música ruidosa me está volviendo loco, ¡no la soporto!"
+      },
+      { 
+        es: "a la larga", 
+        quizEs: "a la larga",
+        en: "in the long run",
+        enEx: "Regular exercise is beneficial in the long run.",
+        esEx: "El ejercicio regular es beneficioso a la larga."
+      },
+      { 
+        es: "a primera vista", 
+        quizEs: "a primera vista",
+        en: "on the surface / at first glance",
+        enEx: "On the surface / at first glance, the task seemed easy.",
+        esEx: "A primera vista, la tarea parecía fácil."
+      },
+      { 
+        es: "resulta que", 
+        quizEs: "resulta que",
+        en: "it turns out",
+        enEx: "It turns out they were brothers all along.",
+        esEx: "Resulta que eran hermanos todo el tiempo."
+      },
+      { 
+        es: "no tiene remedio", 
+        quizEs: "no tiene remedio",
+        en: "hopeless",
+        enEx: "Without any replacement parts, the radio is hopeless.",
+        esEx: "Sin piezas de repuesto, la radio no tiene remedio."
+      },
+      { 
+        es: "agarrarse fuerte", 
+        quizEs: "agarrarse fuerte",
+        en: "hold on tight",
+        enEx: "The train is moving fast, so hold on tight.",
+        esEx: "El tren se mueve rápido, así que agárrate fuerte."
+      },
+      { 
+        es: "mucho menos", 
+        quizEs: "mucho menos",
+        en: "let alone",
+        enEx: "I can't even afford a bicycle, let alone a brand new car.",
+        esEx: "Ni siquiera puedo permitirme una bicicleta, mucho menos un auto nuevo."
+      },
+      { 
+        es: "sin mencionar", 
+        quizEs: "sin mencionar",
+        en: "not to mention",
+        enEx: "It's expensive, not to mention extremely difficult to find.",
+        esEx: "Es costoso, sin mencionar extremadamente difícil de encontrar."
+      },
+      { 
+        es: "medio", 
+        quizEs: "medio",
+        en: "sort of",
+        enEx: "I am sort of tired after the long journey.",
+        esEx: "Estoy medio cansado después del largo viaje."
+      },
+      { 
+        es: "aventura", 
+        quizEs: "aventura",
+        en: "affair",
+        enEx: "After discovering his affair, she decided to file for divorce.",
+        esEx: "Después de descubrir su aventura, ella decidió solicitar el divorcio."
+      },
+      { 
+        es: "cara larga", 
+        quizEs: "cara larga",
+        en: "long face",
+        enEx: "Why do you have such a long face today?",
+        esEx: "¿Por qué tienes esa cara tan larga hoy?"
+      },
+      { 
+        es: "sigue mi ejemplo", 
+        quizEs: "sigue mi ejemplo",
+        en: "follow my lead",
+        enEx: "If you don't know what to do, just follow my lead.",
+        esEx: "Si no sabes qué hacer, solo sigue mi ejemplo."
+      },
+      { 
+        es: "engañoso", 
+        quizEs: "engañoso",
+        en: "deceiving",
+        enEx: "The company was fined for publishing deceiving advertisements about their products.",
+        esEx: "La empresa fue multada por publicar anuncios engañosos sobre sus productos."
+      },
+      { 
+        es: "de la nada", 
+        quizEs: "de la nada",
+        en: "nowhere",
+        enEx: "A wild animal jumped into the road out of nowhere.",
+        esEx: "Un animal salvaje saltó a la carretera de la nada."
+      },
+      { 
+        es: "fulano", 
+        quizEs: "fulano",
+        en: "what´s his name",
+        enEx: "I ran into what's his name at the supermarket.",
+        esEx: "Me encontré con fulano en el supermercado."
+      },
+      { 
+        es: "temperatura ambiente", 
+        quizEs: "temperatura ambiente.",
+        en: "room temperature",
+        enEx: "The medicine should be kept at room temperature.",
+        esEx: "La medicina debe mantenerse a temperatura ambiente."
+      },
+      { 
+        es: "Decepcionar - fallar", 
+        quizEs: "Decepcionar - fallar",
+        en: "let someone down",
+        enEx: "Don't worry, I won't let you down.",
+        esEx: "No te preocupes, no te voy a decepcionar / fallar."
+      },
+      { 
+        es: "Impredecible", 
+        quizEs: "Impredecible.",
+        en: "unpredictable",
+        enEx: "The outcome of the game is completely unpredictable.",
+        esEx: "El resultado del juego es completamente impredecible."
+      },
+      { 
+        es: "Costra", 
+        quizEs: "Costra",
+        en: "scab",
+        enEx: "The wound started to heal and formed a hard scab.",
+        esEx: "La herida comenzó a sanar y formó una costra dura."
+      },
+      { 
+        es: "indignante.", 
+        quizEs: "indignante",
+        en: "outrageous",
+        enEx: "Charging that much for a simple coffee is outrageous.",
+        esEx: "Cobrar tanto por un café simple es indignante."
+      },
+      { 
+        es: "codicioso, ávaro.", 
+        quizEs: "codicioso, ávaro",
+        en: "greedy",
+        enEx: "The greedy landlord kept increasing the rent.",
+        esEx: "El propietario codicioso seguía aumentando el alquiler."
+      },
+      { 
+        es: "él está sediento de poder.", 
+        quizEs: "él está sediento de poder",
+        en: "he is greedy for power",
+        enEx: "He doesn't care about the citizens, he is greedy for power.",
+        esEx: "No le importan los ciudadanos, él está sediento de poder."
+      },
+      { 
+        es: "falsa alarma", 
+        quizEs: "falsa alarma",
+        en: "crying wolf",
+        enEx: "Stop lying to us; if you keep crying wolf, no one will help you.",
+        esEx: "Deja de mentirnos; si sigues dando falsas alarmas nadie va a ayudarte."
+      },
+      { 
+        es: "cuanto más - entre más - mientras más", 
+        quizEs: "cuanto más / entre más / mientras más",
+        en: "the more",
+        enEx: "The job offer seemed great at first, but the more I discovered, the less I wanted the position.",
+        esEx: "La oferta de trabajo parecía excelente al principio, pero cuanto más descubría, menos quería el puesto."
+      },
+      { 
+        es: "ganarse la vida", 
+        quizEs: "ganarse la vida",
+        en: "make a living",
+        enEx: "She works as a writer to make a living.",
+        esEx: "Ella trabaja como escritora para ganarse la vida."
+      },
+      { 
+        es: "dejarse llevar", 
+        quizEs: "dejarse llevar",
+        en: "get carried away",
+        enEx: "Don't get carried away when you win the lottery.",
+        esEx: "No te dejes llevar cuando ganes la lotería."
+      },
+      { 
+        es: "confiar en, contar con, depender de", 
+        quizEs: "confiar en, contar con, depender de",
+        en: "to rely on",
+        enEx: "A child must be able to rely on his parents.",
+        esEx: "Un niño debe ser capaz de confiar en sus padres."
+      },
+      { 
+        es: "recuperación", 
+        quizEs: "recuperación",
+        en: "recovery",
+        enEx: "Doctors are happy with his speedy recovery.",
+        esEx: "Los médicos están felices con su rápida recuperación."
+      },
+      { 
+        es: "acaso", 
+        quizEs: "acaso",
+        en: "even",
+        enEx: "That was an easy task, did you even try?",
+        esEx: "Esa era una tarea fácil, ¿acaso intentaste?"
+      },
+      { 
+        es: "uno de estos días", 
+        quizEs: "uno de estos días",
+        en: "one of these days",
+        enEx: "I am going to buy a new computer one of these days.",
+        esEx: "Voy a comprar una computadora nueva uno de estos días."
+      }
+    ];
+
+    // --- VARIABLES DE ESTADO ---
+    let currentCardIndex = 0;
+    let quizQuestions = [];
+    let currentQuizIndex = 0;
+    let quizScore = 0;
+    let currentLevel = 1;
+
+    // --- CAMBIO DE PESTAÑAS DE NAVEGACIÓN ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('nav button').forEach(btn => {
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-secondary');
+      });
+
+      if (tabId === 'flashcards') {
+        document.getElementById('sec-flashcards').classList.remove('hidden');
+        document.getElementById('tab-flashcards').classList.add('btn-primary');
+        document.getElementById('tab-flashcards').classList.remove('btn-secondary');
+      } else if (tabId === 'quiz') {
+        document.getElementById('sec-quiz').classList.remove('hidden');
+        document.getElementById('tab-quiz').classList.add('btn-primary');
+        document.getElementById('tab-quiz').classList.remove('btn-secondary');
+        selectLevel(currentLevel);
+      }
+    }
+
+    // --- LOGIC DE LAS TARJETAS DE ESTUDIO ---
+    function updateCardDisplay() {
+      const item = vocabulary[currentCardIndex];
+      const cardInner = document.getElementById('flashcard-inner');
+      cardInner.classList.remove('flipped');
+      
+      // Cara delantera: Inglés + Ejemplo en Inglés
+      document.getElementById('card-front-text').innerHTML = `<strong>${item.en}</strong>`;
+      document.getElementById('card-front-example').innerHTML = `<strong>Example:</strong> ${item.enEx}`;
+      
+      // Cara trasera: Solo Español + Ejemplo en Español
+      document.getElementById('card-back-text').innerHTML = `<strong>${item.es}</strong>`;
+      document.getElementById('card-back-example').innerHTML = `<strong>Ejemplo:</strong> ${item.esEx}`;
+      
+      document.getElementById('card-counter').innerHTML = `<strong>${currentCardIndex + 1}</strong> / ${vocabulary.length}`;
+    }
+
+    function toggleCard() {
+      document.getElementById('flashcard-inner').classList.toggle('flipped');
+    }
+
+    function nextCard() {
+      currentCardIndex = (currentCardIndex + 1) % vocabulary.length;
+      updateCardDisplay();
+    }
+
+    function prevCard() {
+      currentCardIndex = (currentCardIndex - 1 + vocabulary.length) % vocabulary.length;
+      updateCardDisplay();
+    }
+
+    function selectLevel(levelNum) {
+      currentLevel = levelNum;
+      
+      // Actualizar el estilo visual del selector de niveles
+      for (let i = 1; i <= 5; i++) {
+        const btn = document.getElementById(`btn-lvl-${i}`);
+        if (i === levelNum) {
+          btn.classList.remove('btn-secondary');
+          btn.classList.add('btn-primary');
+        } else {
+          btn.classList.remove('btn-primary');
+          btn.classList.add('btn-secondary');
+        }
+      }
+
+      initQuizForLevel(levelNum);
+    }
+
+    function initQuizForLevel(levelNum) {
+      quizQuestions = [];
+      quizScore = 0;
+      currentQuizIndex = 0;
+
+      // Definir los rangos de vocabulario para cada nivel:
+      // Niveles 1-4: 10 preguntas cada uno. Nivel 5: últimas 7 preguntas.
+      let startIndex = 0;
+      let endIndex = 0;
+
+      if (levelNum === 1) {
+        startIndex = 0;
+        endIndex = 10;
+      } else if (levelNum === 2) {
+        startIndex = 10;
+        endIndex = 20;
+      } else if (levelNum === 3) {
+        startIndex = 20;
+        endIndex = 30;
+      } else if (levelNum === 4) {
+        startIndex = 30;
+        endIndex = 40;
+      } else if (levelNum === 5) {
+        startIndex = 40;
+        endIndex = 47; // 7 preguntas
+      }
+
+      // Extraer los vocablos correspondientes a este nivel
+      const levelVocabulary = vocabulary.slice(startIndex, endIndex);
+
+      // Mezclar las preguntas correspondientes a este nivel para que no aparezcan siempre en el mismo orden
+      const shuffledLevelVocabulary = [...levelVocabulary].sort(() => 0.5 - Math.random());
+
+      shuffledLevelVocabulary.forEach(item => {
+        // Generar distractores aleatorios buscando en la base de datos completa de 47 elementos
+        const distractors = vocabulary
+          .filter(v => v.en !== item.en)
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 3)
+          .map(v => v.en);
+
+        // Mezclar las opciones del cuestionario
+        const options = [item.en, ...distractors].sort(() => 0.5 - Math.random());
+
+        quizQuestions.push({
+          questionClean: item.quizEs,
+          answer: item.en,
+          options: options
+        });
+      });
+
+      showQuizQuestion();
+    }
+
+    function showQuizQuestion() {
+      document.getElementById('quiz-level-indicator').innerHTML = `<strong>Nivel ${currentLevel}</strong>`;
+      
+      if (currentQuizIndex >= quizQuestions.length) {
+        showQuizResults();
+        return;
+      }
+
+      const q = quizQuestions[currentQuizIndex];
+      document.getElementById('quiz-question-num').innerHTML = `Pregunta <strong>${currentQuizIndex + 1}</strong> de ${quizQuestions.length}`;
+      document.getElementById('quiz-question-text').innerHTML = `¿Cómo se traduce al inglés: <strong>"${q.questionClean}"</strong>?`;
+      
+      const optionsContainer = document.getElementById('quiz-options');
+      optionsContainer.innerHTML = '';
+      document.getElementById('quiz-feedback').innerHTML = '';
+      document.getElementById('btn-quiz-next').classList.add('hidden');
+      document.getElementById('btn-quiz-next-lvl').classList.add('hidden');
+      document.getElementById('btn-quiz-restart').classList.add('hidden');
+
+      q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left p-4 rounded-xl border border-divider hover:bg-[#FFB3D1] transition duration-150 font-medium";
+        btn.innerHTML = opt;
+        btn.onclick = () => selectQuizOption(btn, opt, q.answer);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function selectQuizOption(selectedBtn, selectedOpt, correctOpt) {
+      const optionsContainer = document.getElementById('quiz-options');
+      const buttons = optionsContainer.getElementsByTagName('button');
+
+      // Deshabilitar respuestas adicionales y marcar la correcta en verde claro
+      for (let btn of buttons) {
+        btn.disabled = true;
+        if (btn.innerText === correctOpt) {
+          btn.style.backgroundColor = '#d1fae5'; // Verde suave
+          btn.style.borderColor = '#10b981';
+        }
+      }
+
+      if (selectedOpt === correctOpt) {
+        quizScore++;
+        document.getElementById('quiz-feedback').innerHTML = '<span class="text-green-600 font-bold">¡Correcto! Excelente.</span>';
+      } else {
+        selectedBtn.style.backgroundColor = '#fee2e2'; // Rojo suave
+        selectedBtn.style.borderColor = '#ef4444';
+        document.getElementById('quiz-feedback').innerHTML = `<span class="text-red-600 font-bold">Incorrecto. La respuesta correcta es: <strong>${correctOpt}</strong></span>`;
+      }
+
+      document.getElementById('btn-quiz-next').classList.remove('hidden');
+    }
+
+    function nextQuizQuestion() {
+      currentQuizIndex++;
+      showQuizQuestion();
+    }
+
+    function showQuizResults() {
+      document.getElementById('quiz-question-num').innerHTML = `<strong>Nivel Completado</strong>`;
+      document.getElementById('quiz-question-text').innerHTML = `Has respondido correctamente <strong>${quizScore}</strong> de ${quizQuestions.length} preguntas en el <strong>Nivel ${currentLevel}</strong>.`;
+      document.getElementById('quiz-options').innerHTML = '';
+      document.getElementById('quiz-feedback').innerHTML = '';
+      document.getElementById('btn-quiz-next').classList.add('hidden');
+
+      // Si aún no hemos llegado al nivel 5, mostrar botón de siguiente nivel
+      if (currentLevel < 5) {
+        document.getElementById('btn-quiz-next-lvl').classList.remove('hidden');
+      }
+      document.getElementById('btn-quiz-restart').classList.remove('hidden');
+    }
+
+    function goToNextLevel() {
+      if (currentLevel < 5) {
+        selectLevel(currentLevel + 1);
+      }
+    }
+
+    function restartQuiz() {
+      initQuizForLevel(currentLevel);
+    }
+
+    // Inicialización al cargar la aplicación por primera vez
+    window.onload = function() {
+      updateCardDisplay();
+    };
+  </script>
+</body>
+</html>
